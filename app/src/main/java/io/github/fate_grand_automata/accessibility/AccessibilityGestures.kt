@@ -144,9 +144,11 @@ class AccessibilityGestures @Inject constructor(
         wait(gesturePrefs.clickWaitTime)
     }
 
-    private suspend fun performGesture(StrokeDesc: GestureDescription.StrokeDescription): Boolean = suspendCancellableCoroutine {
+    private suspend fun performGesture(
+        strokeDesc: GestureDescription.StrokeDescription
+    ): Boolean = suspendCancellableCoroutine {
         val gestureDesc = GestureDescription.Builder()
-            .addStroke(StrokeDesc)
+            .addStroke(strokeDesc)
             .build()
 
         val callback = object : AccessibilityService.GestureResultCallback() {
@@ -160,6 +162,111 @@ class AccessibilityGestures @Inject constructor(
         }
 
         TapperService.instance?.dispatchGesture(gestureDesc, callback, null)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun longPressAndDrag8(
+        clicks: List<List<Location>>,
+        chunked: Int = 1
+    ) {
+
+        val firstChunked = clicks.first()
+
+        /**
+         * Creating fastest path possible
+         */
+        val clicksArrays = if (clicks.size > 1) {
+            val lastChunked = clicks.last()
+            listOfNotNull(
+                firstChunked.first(),
+                if (firstChunked.size == 1) null else {
+                    firstChunked.last()
+                },
+                if (lastChunked.size == chunked) null else {
+                    Location(
+                        x = firstChunked.last().x,
+                        y = lastChunked.last().y
+                    )
+                },
+                lastChunked.last(),
+            )
+        } else {
+            listOf(firstChunked.first(), firstChunked.last())
+        }
+        val start = clicksArrays.first()
+        val end = clicksArrays.last()
+
+        /**
+         * Turns out that you need to have a delay to make the
+         * strokes sequential. Otherwise, they will be executed
+         * at the same time or depending on when start time is.
+         */
+        var gestureDelay = 0L
+        val longPressDuration = gesturePrefs.longPressDuration.inWholeMilliseconds
+        val dragDuration = gesturePrefs.dragDuration.inWholeMilliseconds
+        val dragReleaseDuration = 50L
+
+        val mouseDownPath = Path().moveTo(start)
+
+        /**
+         * Long Pressed
+         */
+        var lastStroke = GestureDescription.StrokeDescription(
+            mouseDownPath,
+            gestureDelay,
+            longPressDuration,
+            true
+        ).also {
+            performGesture(it)
+            gestureDelay += longPressDuration
+        }
+        Timber.d("Long Pressed")
+
+        clicksArrays.windowed(2).forEach { (from, to) ->
+            val swipePath = Path()
+                .moveTo(from)
+                .lineTo(to)
+            lastStroke = lastStroke.continueStroke(
+                swipePath,
+                gestureDelay,
+                dragDuration,
+                true
+            ).also {
+                performGesture(it)
+            }
+            Timber.d("Drag From $from to $to  ")
+            gestureDelay += dragDuration
+        }
+
+        val mouseUpPath = Path().moveTo(end)
+        lastStroke.continueStroke(
+            mouseUpPath,
+            gestureDelay,
+            dragReleaseDuration,
+            false
+        ).also {
+            performGesture(it)
+        }
+        Timber.d("End the stroke")
+
+    }
+
+    override fun longPressAndDragOrMultipleClicks(
+        clicks: List<List<Location>>,
+        chunked: Int
+    ) = runBlocking {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            longPressAndDrag8(
+                clicks = clicks,
+                chunked = chunked
+            )
+        } else {
+            clicks.forEach { row ->
+                row.forEach { column ->
+                    click(column)
+                }
+            }
+        }
     }
 
     override fun close() {}

@@ -20,11 +20,15 @@ import io.github.fate_grand_automata.scripts.entrypoints.AutoCEBomb
 import io.github.fate_grand_automata.scripts.entrypoints.AutoFriendGacha
 import io.github.fate_grand_automata.scripts.entrypoints.AutoGiftBox
 import io.github.fate_grand_automata.scripts.entrypoints.AutoLottery
+import io.github.fate_grand_automata.scripts.entrypoints.AutoPlayButtonDetection
+import io.github.fate_grand_automata.scripts.entrypoints.AutoServantEnhancement
+import io.github.fate_grand_automata.scripts.entrypoints.AutoSkillUpgrade
 import io.github.fate_grand_automata.scripts.entrypoints.SupportImageMaker
 import io.github.fate_grand_automata.scripts.enums.GameServer
 import io.github.fate_grand_automata.scripts.enums.ScriptModeEnum
 import io.github.fate_grand_automata.scripts.prefs.IPreferences
 import io.github.fate_grand_automata.ui.exit.BattleExit
+import io.github.fate_grand_automata.ui.exit.SkillUpgradeExit
 import io.github.fate_grand_automata.ui.launcher.ScriptLauncher
 import io.github.fate_grand_automata.ui.launcher.ScriptLauncherResponse
 import io.github.fate_grand_automata.ui.runner.ScriptRunnerUIState
@@ -95,6 +99,38 @@ class ScriptManager @Inject constructor(
                 setOnDismissListener {
                     composeView.close()
                     continuation.resume(Unit)
+                }
+            }
+        }
+    }
+
+    private suspend fun showAutoSkillUpgradeMenu(
+        context: Context,
+        exception: AutoSkillUpgrade.ExitException
+    ) = withContext(Dispatchers.Main) {
+        suspendCancellableCoroutine<Unit> { continuation ->
+            var dialog: DialogInterface? = null
+
+            val composeView = FakedComposeView(context) {
+                SkillUpgradeExit(
+                    exception = exception,
+                    prefs = preferences,
+                    onClose = { dialog?.dismiss() },
+                    onCopy = { clipboardManager.set(context, exception) }
+                )
+            }
+            dialog = showOverlayDialog(context) {
+                setView(composeView.view)
+
+                setOnDismissListener {
+                    uiStateHolder.isPlayButtonEnabled = true
+                    composeView.close()
+
+                    try {
+                        continuation.resume(Unit)
+                    } catch (e: IllegalStateException) {
+                        // Ignore exception on resuming twice
+                    }
                 }
             }
         }
@@ -185,6 +221,8 @@ class ScriptManager @Inject constructor(
                 val msg = when (val reason = e.reason) {
                     AutoFriendGacha.ExitReason.InventoryFull -> context.getString(R.string.inventory_full)
                     is AutoFriendGacha.ExitReason.Limit -> context.getString(R.string.times_rolled, reason.count)
+                    AutoFriendGacha.ExitReason.UnableVerifyIfReachedCEEnhancementMenu ->
+                        context.getString(R.string.unable_to_verify_if_reached_the_ce_menu)
                 }
 
                 messages.notify(msg)
@@ -205,11 +243,52 @@ class ScriptManager @Inject constructor(
 
             is AutoCEBomb.ExitException -> {
                 val msg = when (e.reason) {
-                    AutoCEBomb.ExitReason.NoSuitableTargetCEFound -> "No suitable target CE found"
+                    AutoCEBomb.ExitReason.NoSuitableTargetCEFound -> context.getString(R.string.ce_bomb_no_suitable_ces)
+                    AutoCEBomb.ExitReason.MaxNumberOfIterations -> context.getString(R.string.ce_bomb_max_iterations)
+                    AutoCEBomb.ExitReason.CEFullyUpgraded -> context.getString(R.string.ce_bomb_ce_fully_upgraded)
                 }
 
                 messages.notify(msg)
                 messageBox.show(scriptExitedString, msg)
+            }
+
+            is AutoSkillUpgrade.ExitException -> {
+                if (e.reason !is AutoSkillUpgrade.ExitReason.Abort) {
+                    messages.notify(scriptExitedString)
+                }
+                showAutoSkillUpgradeMenu(service, e)
+            }
+
+            is AutoServantEnhancement.ExitException -> {
+                val msg = when (val reason = e.reason) {
+                    AutoServantEnhancement.ExitReason.NoServantSelected ->
+                        context.getString(R.string.enhancement_missing_servant)
+
+                    AutoServantEnhancement.ExitReason.RanOutOfQP -> context.getString(R.string.ran_out_of_qp)
+                    is AutoServantEnhancement.ExitReason.Unexpected -> {
+                        e.let {
+                            "${context.getString(R.string.unexpected_error)}: ${e.message}"
+                        }
+                    }
+
+                    is AutoServantEnhancement.ExitReason.Limit ->
+                        context.getString(R.string.level_uo_by, reason.count)
+
+                    AutoServantEnhancement.ExitReason.MaxLevelAchieved ->
+                        context.getString(R.string.max_level)
+
+                    AutoServantEnhancement.ExitReason.NoEmbersOrQPLeft ->
+                        context.getString(R.string.servant_enhancement_no_embers_or_qp_left)
+
+                    AutoServantEnhancement.ExitReason.Abort ->
+                        context.getString(R.string.enhancement_halt_aborted)
+                }
+
+                messages.notify(msg)
+                messageBox.show(scriptExitedString, msg)
+            }
+            is AutoPlayButtonDetection.ExitException -> {
+                // do nothing
             }
 
             is KnownException -> {
@@ -241,6 +320,9 @@ class ScriptManager @Inject constructor(
             ScriptModeEnum.PresentBox -> entryPoint.giftBox()
             ScriptModeEnum.SupportImageMaker -> entryPoint.supportImageMaker()
             ScriptModeEnum.CEBomb -> entryPoint.ceBomb()
+            ScriptModeEnum.SkillUpgrade -> entryPoint.skillUpgrade()
+            ScriptModeEnum.ServantLevel -> entryPoint.servantLevel()
+            ScriptModeEnum.PlayButtonDetection -> entryPoint.playButtonDetection()
         }
 
     enum class PauseAction {
@@ -386,7 +468,8 @@ class ScriptManager @Inject constructor(
                         continuation.resume(it)
                         dialog?.dismiss()
                     },
-                    prefs = preferences
+                    prefs = preferences,
+                    prefsCore = prefsCore
                 )
             }
 

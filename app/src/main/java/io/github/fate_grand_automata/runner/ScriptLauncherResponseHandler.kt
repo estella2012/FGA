@@ -18,12 +18,8 @@ class ScriptLauncherResponseHandler @Inject constructor(
     fun handle(resp: ScriptLauncherResponse) {
         prefs.scriptMode = when (resp) {
             ScriptLauncherResponse.Cancel -> return
-            is ScriptLauncherResponse.FP -> {
-                prefs.shouldLimitFP = resp.limit != null
-                resp.limit?.let { prefs.limitFP = it }
 
-                ScriptModeEnum.FP
-            }
+            is ScriptLauncherResponse.FP -> ScriptModeEnum.FP
 
             is ScriptLauncherResponse.Lottery -> {
                 val giftBoxResp = resp.giftBox
@@ -41,15 +37,29 @@ class ScriptLauncherResponseHandler @Inject constructor(
             }
 
             ScriptLauncherResponse.SupportImageMaker -> ScriptModeEnum.SupportImageMaker
-            is ScriptLauncherResponse.CEBomb -> {
-                prefs.ceBombTargetRarity = resp.targetRarity
-
-                ScriptModeEnum.CEBomb
-            }
-
+            ScriptLauncherResponse.CEBomb -> ScriptModeEnum.CEBomb
             is ScriptLauncherResponse.Battle -> {
                 ScriptModeEnum.Battle
             }
+
+            is ScriptLauncherResponse.SkillUpgrade -> {
+
+                prefs.skillUpgrade.shouldUpgradeSkill1 = resp.shouldUpgradeSkill1
+                prefs.skillUpgrade.upgradeSkill1 = resp.upgradeSkill1
+
+                prefs.skillUpgrade.shouldUpgradeSkill2 = resp.shouldUpgradeSkill2
+                prefs.skillUpgrade.upgradeSkill2 = resp.upgradeSkill2
+
+                prefs.skillUpgrade.shouldUpgradeSkill3 = resp.shouldUpgradeSkill3
+                prefs.skillUpgrade.upgradeSkill3 = resp.upgradeSkill3
+
+                ScriptModeEnum.SkillUpgrade
+            }
+
+            is ScriptLauncherResponse.ServantEnhancement -> ScriptModeEnum.ServantLevel
+
+            is ScriptLauncherResponse.PlayButtonDetection ->
+                ScriptModeEnum.PlayButtonDetection
         }
     }
 }

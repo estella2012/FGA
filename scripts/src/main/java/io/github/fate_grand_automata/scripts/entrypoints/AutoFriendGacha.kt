@@ -14,10 +14,13 @@ import kotlin.time.Duration.Companion.seconds
 @ScriptScope
 class AutoFriendGacha @Inject constructor(
     exitManager: ExitManager,
-    api: IFgoAutomataApi
+    api: IFgoAutomataApi,
+    private val autoCEBomb: AutoCEBomb
 ) : EntryPoint(exitManager), IFgoAutomataApi by api {
     sealed class ExitReason {
-        object InventoryFull : ExitReason()
+
+        data object UnableVerifyIfReachedCEEnhancementMenu : ExitReason()
+        data object InventoryFull : ExitReason()
         class Limit(val count: Int) : ExitReason()
     }
 
@@ -26,7 +29,7 @@ class AutoFriendGacha @Inject constructor(
     private var count = 0
 
     private fun countNext() {
-        if (prefs.shouldLimitFP && count >= prefs.limitFP) {
+        if (prefs.friendGacha.shouldLimitFP && count >= prefs.friendGacha.limitFP) {
             throw ExitException(ExitReason.Limit(count))
         }
 
@@ -44,7 +47,23 @@ class AutoFriendGacha @Inject constructor(
 
         while (true) {
             if (isInventoryFull()) {
-                throw ExitException(ExitReason.InventoryFull)
+                if (prefs.friendGacha.shouldCreateCEBombAfterSummon && canGoToCeEnhancementMenu()) {
+                    locations.inventoryFullRegion.click()
+                    val isScreenTransitionAchieved = locations.ceBomb.getCeEnhanceRegion.exists(
+                        image = images[Images.CraftEssenceEnhancement],
+                        timeout = 30.seconds,
+                        // due to some effects behind the word `craft` that affects the similarity
+                        // lowering it would make the detection faster
+                        similarity = 0.6
+                    )
+                    if (isScreenTransitionAchieved) {
+                        autoCEBomb.script()
+                    } else {
+                        throw ExitException(ExitReason.UnableVerifyIfReachedCEEnhancementMenu)
+                    }
+                } else {
+                    throw ExitException(ExitReason.InventoryFull)
+                }
             }
 
             if (isSummonButtonVisible()) {
@@ -59,4 +78,6 @@ class AutoFriendGacha @Inject constructor(
     }
 
     private fun isSummonButtonVisible() = findImage(locations.fp.continueSummonRegion, Images.FPSummonContinue)
+
+    private fun canGoToCeEnhancementMenu() = images[Images.FPCENotice] in locations.fp.ceFullVerifyRegion
 }

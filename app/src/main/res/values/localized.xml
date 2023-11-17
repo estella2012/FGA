@@ -87,6 +87,9 @@ Skills"</string>
     <string name="p_limit">"Limit"</string>
     <string name="p_runs">"Runs"</string>
     <string name="p_roll_limit">"Limit number of rolls"</string>
+    <string name="p_roll_create_ce_bomb_after_summon">"Should the CE bomb script run after the maximum limit of CEs has been reached?"</string>
+    <string name="p_roll_create_ce_bomb_after_summon_note">"Note of the following:"</string>
+    <string name="p_roll_create_ce_bomb_reminder">"- It will only redirect to the Craft Essence Enhancement menu when the maximum number of CEs has been reached."</string>
     <string name="p_receive_embers">"Receive embers"</string>
     <string name="p_battle_config_name">"Name"</string>
     <string name="p_battle_config_cmd">"Command"</string>
@@ -169,6 +172,11 @@ Copy or rename it if you want to keep it."</string>
     <string name="p_fine_tune_wait_before_turn">"Wait before Turn"</string>
     <string name="p_fine_tune_wait_before_cards">"Wait before Cards"</string>
     <string name="p_fine_tune_wait_multiplier">"Wait Multiplier"</string>
+
+    <string name="p_fine_tune_drag">"Dragging"</string>
+    <string name="p_fine_tune_long_press_duration">"Long Press duration"</string>
+    <string name="p_fine_tune_drag_duration">"Drag duration"</string>
+
     <string name="troubleshoot">"Troubleshooting"</string>
     <string name="battle_config_edit">"Edit config"</string>
     <string name="card_priority">"Card Priority"</string>
@@ -197,6 +205,7 @@ Copy or rename it if you want to keep it."</string>
     <string name="p_script_mode_fp">"Friend Gacha"</string>
     <string name="p_script_mode_support_image_maker">"Support Image Maker"</string>
     <string name="p_script_mode_gift_box">"Gift Box"</string>
+    <string name="p_script_mode_ce_bomb">CE Bomb</string>
     <string name="p_max_gold_ember_set_size">"Max Gold ember set size"</string>
     <string name="p_not_set">"Not Set"</string>
     <string name="p_support_class_none">"None"</string>
@@ -264,6 +273,7 @@ Please turn on accessibility for this app from System settings. If it is already
     <string name="p_ces">"CEs"</string>
     <string name="ces_dropped">"%d CE(s) dropped"</string>
     <string name="times_rolled">"Rolled %d time(s)"</string>
+    <string name="unable_to_verify_if_reached_the_ce_menu">"Unable to verify if reached the CE Enhancement Screen, exiting early"</string>
     <string name="mat_proof">"Proof of Hero"</string>
     <string name="mat_bone">"Evil Bone"</string>
     <string name="mat_fang">"Dragon's Fang"</string>
@@ -385,7 +395,79 @@ After pressing on the button, switch the app filter from \"Not optimized\" to \"
     <string name="update_download_success">"Download successful. Restarting app in 5 seconds."</string>
     <string name="skill_maker_melusine">"Mélusine"</string>
 
+    <string name="p_ce_bomb_explanation">
+        "Please read before starting script!\n\nWithout proper sorting, this script will consume CE indiscriminately.\n\nFor the most optimal pre-setup, please follow the following instructions before starting script:\n\n1) CE list to the smallest possible size\n\n2) Sort the base CE by ascending rarity with \"Smart Sort ON\"\n\n3) Sort the CE fodder by ascending rarity with \"Smart Sort ON\"\n\nIn case confused to follow the above instructions, you may use FGA's sort + filter function for reference,which will be utilized automatically upon starting script.\n\nHowever, please keep in mind if a wrong base CE / CE fodder is used, FGA developers will not be held responsible.\n\nShould the CE have been maxed levelled - it is highly recommended to prevent accidental CE fodder use by locking it and/or put it in the Second Archive."
+    </string>
+    <string name="ce_bomb_no_suitable_ces">No suitable target CE found</string>
+    <string name="ce_bomb_max_iterations">Max number of iterations reached</string>
+    <string name="ce_bomb_ce_fully_upgraded">CE is fully upgraded. Please lock it or put it in second archive</string>
+    <string name="p_ce_bomb_skip_sort_setup">Skip the CE sort settings setup?</string>
+    <string name="p_ce_bomb_skip_sort_reminder">Make sure the sort settings are configured.</string>
+    <string name="p_ce_bomb_skip_filter_setup">Skip the CE filter settings setup?</string>
+    <string name="p_ce_bomb_skip_filter_reminder">Make sure the filter settings are configured.</string>
+    <string name="p_ce_bomb_target_rarity">Target Rarity</string>
+    <string name="p_ce_bomb_fodder_rarity">Fodder Rarity</string>
+    <string name="p_ce_bomb_long_press">Long Press</string>
+    <string name="p_ce_bomb_drag">Drag</string>
+    <string name="p_ce_bomb_duration">Duration</string>
+    <string name="p_ce_bomb_hide_dragging_settings">Hide Dragging Settings</string>
+    <string name="p_ce_bomb_show_dragging_settings">Show Dragging Settings</string>
+    <string name="p_ce_bomb_skip_display_size_setup">Skip the display size setup?</string>
+    <string name="p_ce_bomb_skip_display_size_reminder">Please ensure that the display size is set to the smallest option.</string>
+    <string name="p_ce_bomb_skip_display_size_warning">Set the display size to the smallest option available.</string>
+    <string name="p_ce_bomb_dragging">Dragging</string>
+    <string name="p_ce_bomb_clicking">Clicking</string>
+    <string name="p_ce_bomb_selection_method">Selection method</string>
+
     <string name="script_msg_storm_pods_ran_out">"Ran out of Storm Pods"</string>
     <string name="reset_all">"Reset all"</string>
+    <string name="reset">"Reset"</string>
     <string name="reset_to_default">"Reset to default"</string>
+
+    <string name="skill_upgrade">Skill Upgrade</string>
+    <string name="skill_1">Skill 1</string>
+    <string name="skill_2">Skill 2</string>
+    <string name="skill_3">Skill 3</string>
+    <string name="skill_max">Max Level</string>
+    <string name="skill_not_available">Not Available</string>
+    <string name="skill_not_selected_for_enhancement">Not Selected for enhancement</string>
+
+    <string name="skill_number">"Skill %d"</string>
+    <string name="skill_level_up_by">"Level up by %d"</string>
+
+    <string name="enhancement_missing_servant">No Servant Selected. Please select a servant before proceeding.</string>
+    <string name="skill_enhancement_halt">Enhancement halt</string>
+    <string name="enhancement_halt_aborted">Enhancement halt due to script abort</string>
+
+    <string name="ran_out_of_qp">Ran out of QP</string>
+    <string name="done">Done</string>
+
+    <string name="skill_enhancement_error_no_enhancment">No enhancement perform</string>
+    <string name="skill_enhancement_error_exit_early_out_of_qp">Exit early due to Insufficient QP</string>
+    <string name="skill_enhancement_error_out_of_qp">Insufficient QP</string>
+    <string name="skill_enhancement_error_out_of_mats">Insufficient mats</string>
+
+    <string name="skill_enhancement_error_target_not_met">"Unable to finish enhancement to Lvl %d"</string>
+
+    <string name="success">Success</string>
+
+    <string name="level_uo_by">"Level up by %d time(s)"</string>
+    <string name="max_level">Max Level Achieved</string>
+
+    <string name="servant_enhancement">Servant Enhancement</string>
+
+    <string name="servant_enhancement_limit">Should limit number of enhancement?</string>
+    <string name="servant_enhancement_no_embers_or_qp_left">Insufficient Embers or QP</string>
+    <string name="servert_enhancement_warning_notice">Auto Servant Enhancement will only use the auto-select feature for the embers.
+        Please ensure that you have set the \"Automatic Material Selection\" before proceeding.</string>
+
+    <string name="skill_enhancement_all_question">Should update all available skill?</string>
+
+    <string name="p_script_mode_play_button_detection">Play Button Detection</string>
+    <string name="p_play_button_detection_explanation">Place the play button on the bottom left of the screen for optimal configuration</string>
+    <string name="p_ignore_play_button_detection_further_warning">Ignore further warning about play button\'s location.</string>
+    <string name="p_ignore_play_button_detection_warning">Ignore warning about play button\'s location.</string>
+    <string name="p_fp_gacha_show_ce_bomb_settings">Show CE Bomb Settings</string>
+    <string name="p_fp_gacha_hide_ce_bomb_settings">Hide CE Bomb Settings</string>
+
 </resources>

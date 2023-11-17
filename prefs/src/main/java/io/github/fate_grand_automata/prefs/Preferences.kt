@@ -4,11 +4,17 @@ import io.github.fate_grand_automata.prefs.core.PrefsCore
 import io.github.fate_grand_automata.prefs.core.map
 import io.github.fate_grand_automata.scripts.enums.GameServer
 import io.github.fate_grand_automata.scripts.prefs.IBattleConfig
+import io.github.fate_grand_automata.scripts.prefs.ICraftEssencePreferences
+import io.github.fate_grand_automata.scripts.prefs.IFriendGachaPreferences
 import io.github.fate_grand_automata.scripts.prefs.IGesturesPreferences
 import io.github.fate_grand_automata.scripts.prefs.IPerServerConfigPrefs
 import io.github.fate_grand_automata.scripts.prefs.IPreferences
+import io.github.fate_grand_automata.scripts.prefs.IServantEnhancementPreferences
+import io.github.fate_grand_automata.scripts.prefs.ISkillUpgradePreferences
 import io.github.fate_grand_automata.scripts.prefs.ISupportPreferencesCommon
+import io.github.lib_automata.Location
 import io.github.lib_automata.PlatformPrefs
+import io.github.lib_automata.Region
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -94,14 +100,9 @@ class PreferencesImpl @Inject constructor(
 
     override var maxGoldEmberTotalCount by prefs.maxGoldEmberTotalCount
 
-    override var ceBombTargetRarity by prefs.ceBombTargetRarity
-
     override var stopAfterThisRun by prefs.stopAfterThisRun
 
     override var skipServantFaceCardCheck by prefs.skipServantFaceCardCheck
-
-    override var shouldLimitFP by prefs.shouldLimitFP
-    override var limitFP by prefs.limitFP
 
     override var receiveEmbersWhenGiftBoxFull by prefs.receiveEmbersWhenGiftBoxFull
 
@@ -160,6 +161,24 @@ class PreferencesImpl @Inject constructor(
     override fun completedOnboarding() =
         prefs.onboardingCompletedVersion.set(PrefsCore.CURRENT_ONBOARDING_VERSION)
 
+    override val skillUpgrade: ISkillUpgradePreferences = SkillUpgradePrefs(prefs.skillUpgrade)
+
+    override val servant: IServantEnhancementPreferences =
+        ServantEnhancementPrefs(prefs.servantEnhancement)
+
+    override val craftEssence: ICraftEssencePreferences =
+        CraftEssencePrefs(prefs.craftEssence)
+
+    override val friendGacha: IFriendGachaPreferences =
+        FriendGachaPrefs(prefs.friendGacha)
+
+    override val playButtonLocation: Location by prefs.playBtnLocation
+
+    override val playButtonRegion: Region by prefs.playButtonRegion
+
+    override val ignorePlayButtonDetectionWarning: Boolean by
+    prefs.ignorePlayButtonDetectionWarning
+
     override val support = object :
         ISupportPreferencesCommon {
         override val mlbSimilarity by prefs.mlbSimilarity.map { it / 100.0 }
@@ -196,5 +215,12 @@ class PreferencesImpl @Inject constructor(
 
         override val swipeDuration by prefs.swipeDuration
             .map { it.milliseconds }
+
+        override val longPressDuration by prefs.longPressDuration
+            .map { it.milliseconds }
+        override val dragDuration by prefs.dragDuration
+            .map { it.milliseconds }
+
+
     }
 }

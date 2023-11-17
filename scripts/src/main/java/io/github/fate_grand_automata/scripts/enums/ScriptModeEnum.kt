@@ -6,5 +6,8 @@ enum class ScriptModeEnum {
     Lottery,
     PresentBox,
     SupportImageMaker,
-    CEBomb
+    CEBomb,
+    SkillUpgrade,
+    ServantLevel,
+    PlayButtonDetection
 }
